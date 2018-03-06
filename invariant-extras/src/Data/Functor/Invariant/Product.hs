@@ -1,3 +1,4 @@
+{-# LANGUAGE EmptyCase #-}
 module Data.Functor.Invariant.Product (
     ProductFC(..)
   , ProductCF(..)
@@ -16,6 +17,13 @@ import Data.Functor.Contravariant.Divisible
 
 import Data.Functor.Contravariant.Extras
 import Data.Functor.Invariant.Multiplicable
+
+-- this is temporary
+import Generics.Eot (Void)
+
+-- this is temporary
+otherAbsurd :: Generics.Eot.Void -> a
+otherAbsurd a = case a of {}
 
 data ProductFC f g a = ProductFC (f a) (g a)
 
@@ -36,8 +44,8 @@ instance (Alternative f, Decidable g) => Factor (ProductFC f g) where
     ProductFC (Left <$> f1 <|> Right <$> f2) (g1 >|< g2)
 
 instance (Alternative f, Decidable g) => Factorable (ProductFC f g) where
-  funit =
-    ProductFC empty lost
+  funit f =
+    ProductFC empty (lose (otherAbsurd . f))
 
 instance (Monad f, Chainable g) => Dependable (ProductFC f g) where
   depend (ProductFC fa ga) ba afb =
@@ -66,8 +74,8 @@ instance (Decidable f, Alternative g) => Factor (ProductCF f g) where
     ProductCF (f1 >|< f2) (Left <$> g1 <|> Right <$> g2)
 
 instance (Decidable f, Alternative g) => Factorable (ProductCF f g) where
-  funit =
-    ProductCF lost empty
+  funit f =
+    ProductCF (lose (otherAbsurd . f)) empty
 
 instance (Chainable f, Monad g) => Dependable (ProductCF f g) where
   depend (ProductCF fa ga) ba afb =
@@ -96,8 +104,8 @@ instance (Alternative f, Factor g) => Factor (ProductFI f g) where
     ProductFI (Left <$> f1 <|> Right <$> f2) (g1 >>|<< g2)
 
 instance (Alternative f, Factorable g) => Factorable (ProductFI f g) where
-  funit =
-    ProductFI empty funit
+  funit f =
+    ProductFI empty (funit f)
 
 instance (Monad f, Dependable g) => Dependable (ProductFI f g) where
   depend (ProductFI fa ga) ba afb =
@@ -126,8 +134,8 @@ instance (Factor f, Alternative g) => Factor (ProductIF f g) where
     ProductIF (f1 >>|<< f2) (Left <$> g1 <|> Right <$> g2)
 
 instance (Factorable f, Alternative g) => Factorable (ProductIF f g) where
-  funit =
-    ProductIF funit empty
+  funit f =
+    ProductIF (funit f) empty
 
 instance (Dependable f, Monad g) => Dependable (ProductIF f g) where
   depend (ProductIF fa ga) ba afb =
@@ -156,8 +164,8 @@ instance (Decidable f, Factor g) => Factor (ProductCI f g) where
     ProductCI (f1 >|< f2) (g1 >>|<< g2)
 
 instance (Decidable f, Factorable g) => Factorable (ProductCI f g) where
-  funit =
-    ProductCI lost funit
+  funit f =
+    ProductCI (lose (otherAbsurd . f)) (funit f)
 
 instance (Chainable f, Dependable g) => Dependable (ProductCI f g) where
   depend (ProductCI fa ga) ba afb =
@@ -186,8 +194,8 @@ instance (Factor f, Decidable g) => Factor (ProductIC f g) where
     ProductIC (f1 >>|<< f2) (g1 >|< g2)
 
 instance (Factorable f, Decidable g) => Factorable (ProductIC f g) where
-  funit =
-    ProductIC funit lost
+  funit f =
+    ProductIC (funit f) (lose (otherAbsurd . f))
 
 instance (Dependable f, Chainable g) => Dependable (ProductIC f g) where
   depend (ProductIC fa ga) ba afb =

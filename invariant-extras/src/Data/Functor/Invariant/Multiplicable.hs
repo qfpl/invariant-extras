@@ -10,6 +10,11 @@ import Data.Functor.Invariant
 import Data.Functor.Product
 import Data.Void
 
+import Unsafe.Coerce (unsafeCoerce)
+
+-- this is temporary
+import Generics.Eot (Void)
+
 infixr 4 >>*<<
 infixr 4 >>*
 infixr 4 *<<
@@ -41,10 +46,13 @@ instance (Factor f, Factor g) => Factor (Product f g) where
   Pair f1 g1 >>|<< Pair f2 g2 = Pair (f1 >>|<< f2) (g1 >>|<< g2)
 
 class Factor f => Factorable f where
-  funit :: f Void
+  funit :: (a -> Generics.Eot.Void) -> f a
+
+  plug :: f a
+  plug = funit unsafeCoerce
 
 instance (Factorable f, Factorable g) => Factorable (Product f g) where
-  funit = Pair funit funit
+  funit f = Pair (funit f) (funit f)
 
 class Multiplicable f => Dependable f where
   depend :: f a -> (b -> a) -> (a -> f b) -> f b
